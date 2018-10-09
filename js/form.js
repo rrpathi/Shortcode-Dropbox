@@ -1,7 +1,7 @@
 jQuery(document).ready(function(){
 	jQuery("#add_more").click(function(e){
 		e.preventDefault();
-		jQuery(".custome_form").append('<div class="form-group col-md-6"><label for="text">Label Name</label><input type="text" class="form-control label_name" id="text" placeholder="Enter text" name="label[]"></div><div class="form-group col-md-6"><label for="pwd">Field Name</label><input type="text" class="form-control field_name" placeholder="text,password" name="field[]"></div>');
+		jQuery(".custome_form").append('<div class="single-short-code"><div class="form-group col-md-5"><label for="text">Label Name</label><input type="text" class="form-control label_name" id="text" placeholder="Enter text" name="label[]"></div><div class="form-group col-md-5"><label for="pwd">Field Name</label><input type="text" class="form-control field_name" placeholder="text,password" name="field[]"></div><div class="form-group col-md-2"><input class="btn btn-danger remove-short-code" style="margin-top:25px" type="button" value="Delete"></div></div>');
 	});
 
 	jQuery("#submit").click(function(e){
@@ -48,7 +48,7 @@ jQuery(document).ready(function(){
 			jQuery(".show-form-hide").hide();
 			jQuery(".edit-form").html(data);
 			jQuery("#add_add_more_field").click(function(){
-				jQuery(".custome_form").append('<div class="form-group col-md-6"><label for="text">Label Name</label><input type="text" class="form-control label_name" id="text" placeholder="Enter text" name="label[]"></div><div class="form-group col-md-6"><label for="pwd">Field Name</label><input type="text" class="form-control field_name" placeholder="text,password" name="field[]"></div>');
+				jQuery(".custome_form").append('<div class="single-short-code"><div class="form-group col-md-5"><label for="text">Label Name</label><input type="text" class="form-control label_name" id="text" placeholder="Enter text" name="label[]"></div><div class="form-group col-md-5"><label for="pwd">Field Name</label><input type="text" class="form-control field_name" placeholder="text,password" name="field[]"></div><div class="form-group col-md-2"><input class="btn btn-danger remove-short-code" style="margin-top:25px" type="button" value="Delete"></div></div>');
 			});
 			jQuery("#update_add_more_details").click(function(e){
 				e.preventDefault();
@@ -83,7 +83,7 @@ jQuery(document).ready(function(){
 		});
 	});
 
-		jQuery(".delete_short_code").click(function(){
+	jQuery(".delete_short_code").click(function(){
 		var short_code_id = jQuery(this).attr("value");
 		jQuery.ajax({
 			type:"post",
@@ -106,5 +106,17 @@ jQuery(document).ready(function(){
 			}
 		});
 	});
+
+	jQuery("body").on("click",".remove-short-code",function(){
+		 jQuery(this).closest('div.single-short-code').remove();
+	});
+	
+	jQuery("body").on("click",".remove",function(){
+	var parent = jQuery(this).closest(".hack");
+	var id = parent.attr("id");
+	console.log(id);
+	jQuery("#"+id).remove();
+});
+
 
 });
