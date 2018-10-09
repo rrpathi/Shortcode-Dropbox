@@ -44,6 +44,7 @@ class DropboxUpload{
 		add_action('wp_ajax_shot_code_register',array($this,'add_new_shotcode'));
 		add_action('wp_ajax_edit_short_code',array($this,'edit_short_code'));
 		add_action('wp_ajax_delete_short_code',array($this,'delete_short_code'));
+		add_action('wp_ajax_update_short_code_details',array($this,'update_short_code_details'));
 		add_filter('shot-code',array($this,'shot_code_callback'),10,1);
 	}
 
@@ -62,6 +63,10 @@ class DropboxUpload{
 		// echo "<pre>";
 		// print_r($edit_short_code);
 		
+	}
+
+	public function update_short_code_details(){
+		print_r($_POST);
 	}
 
 	public function delete_short_code(){
