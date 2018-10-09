@@ -43,6 +43,7 @@ class DropboxUpload{
 		add_action('wp_ajax_my_ajax_function',array($this,'dropbox_sdk'));
 		add_action('wp_ajax_shot_code_register',array($this,'add_new_shotcode'));
 		add_action('wp_ajax_edit_short_code',array($this,'edit_short_code'));
+		add_action('wp_ajax_delete_short_code',array($this,'delete_short_code'));
 		add_filter('shot-code',array($this,'shot_code_callback'),10,1);
 	}
 
@@ -50,10 +51,37 @@ class DropboxUpload{
 		global $wpdb;
 		$table_name = $this->db_prefix().'custome_form';
 		$edit_short_code = $wpdb->get_results("SELECT * FROM $table_name WHERE id ='".$_POST['short_code_id']."'",ARRAY_A)[0];
-		echo "<pre>";
-		print_r($edit_short_code);
+		if(!empty($edit_short_code)){
+			include PLUGIN_DIR_PATH.'view/edit_short_code.php';
+			// echo "<pre>";
+			// print_r($edit_short_code);
+
+			wp_die();
+
+		}
+		// echo "<pre>";
+		// print_r($edit_short_code);
 		
 	}
+
+	public function delete_short_code(){
+		global $wpdb;
+		$table_name = $this->db_prefix().'custome_form';
+		$result = $wpdb->delete( $table_name, array( 'id' =>$_POST['short_code_id']));
+		if($result){
+			echo json_encode(array('status'=>'1'));
+			wp_die();
+		}else{
+			echo json_encode(array('status'=>'0'));
+			wp_die();
+			
+		}
+		// $edit_short_code = $wpdb->get_results("SELECT * FROM $table_name WHERE id ='".$_POST['short_code_id']."'",ARRAY_A)[0];
+		// echo "<pre>";
+		// print_r($edit_short_code);
+		
+	}
+
 	public function credentials(){
 		unset($_POST['action']);
 		global $wpdb;
@@ -148,6 +176,7 @@ class DropboxUpload{
 		wp_enqueue_script('jquery');
 		wp_enqueue_script('custome.js',PLUGIN_DIR_URL.'js/custome.js');
 		wp_enqueue_script('form-js',PLUGIN_DIR_URL.'js/form.js');
+		wp_enqueue_style( 'font.css','https://maxcdn.bootstrapcdn.com/font-awesome/4.4.0/css/font-awesome.min.css');
 	}
 	public function db_prefix(){
 		global $wpdb;
@@ -165,13 +194,15 @@ class DropboxUpload{
 		global $wpdb;
 		$table_name  = $this->db_prefix()."custome_form";
 		$value =  $wpdb->get_results("SELECT * FROM $table_name ",ARRAY_A);
-		$apply_filter = apply_filters('shot-code',$value);
-		foreach ($apply_filter as  $shortcode_name => $shortcode_value) {
-			add_shortcode($shortcode_name,function() use ($shortcode_value){
-				foreach($shortcode_value as $key =>$value){
-					echo "$key:<input type='text' value='".$value."'><br>";
-				}
-			});
+		if(!empty($value)){
+			$apply_filter = apply_filters('shot-code',$value);
+			foreach ($apply_filter as  $shortcode_name => $shortcode_value) {
+				add_shortcode($shortcode_name,function() use ($shortcode_value){
+					foreach($shortcode_value as $key =>$value){
+						echo "$key:<input type='text' value='".$value."'><br>";
+					}
+				});
+			}
 		}
 	}
 

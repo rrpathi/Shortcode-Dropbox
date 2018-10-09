@@ -45,13 +45,35 @@ jQuery(document).ready(function(){
 				short_code_id:short_code_id,
 			},
 			success:function(data){
-				console.log(data);
+				jQuery(".show-form-hide").hide();
+				jQuery(".edit-form").html(data);
+				
 			}
 		});
 	});
 
-	jQuery(".delete_short_code").click(function(){
+		jQuery(".delete_short_code").click(function(){
 		var short_code_id = jQuery(this).attr("value");
+		jQuery.ajax({
+			type:"post",
+			url:ajaxurl,
+			data:{
+				action:"delete_short_code",
+				short_code_id:short_code_id,
+			},
+			success:function(data){
+				console.log(data);
+				var data = jQuery.parseJSON(data);
+				if(data['status'] =='1'){
+					// jQuery(".response").html("<h2>Shot Code Deleted Successfully</h2>");
+					location. reload(true);
+				}else{
+					location. reload(true);
+					console.log("Shot Code Not Deleted ");
+
+				}
+			}
+		});
 	});
 
 });
