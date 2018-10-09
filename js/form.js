@@ -71,7 +71,11 @@ jQuery(document).ready(function(){
 					update_short_code_details:stringData,
 					},
 					success:function(data){
-						console.log(data);
+						if(data['status'] =='1'){
+							location. reload(true);
+						}else{
+							location. reload(true);
+						}
 					}
 				});
 			});

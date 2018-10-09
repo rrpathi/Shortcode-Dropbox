@@ -31,11 +31,7 @@ class DropboxUpload{
 		define('PLUGIN_DIR_PATH',plugin_dir_path(__FILE__));
 		// http://localhost/dropbox-wordpress/wp-content/plugins/Dropbox/
 	}
-	public function call_back(){
-		 file_put_contents(WP_CONTENT_DIR . "/test-ragu.txt",var_export($_POST), FILE_APPEND);
-		 file_put_contents("test-ragu.txt","hello world", FILE_APPEND);
-		// return "Hello World";
-	}
+	
 	public function action(){
 		add_action('admin_enqueue_scripts',array($this,'script'));
 		add_action('admin_menu',array($this,'menu'));
@@ -54,19 +50,45 @@ class DropboxUpload{
 		$edit_short_code = $wpdb->get_results("SELECT * FROM $table_name WHERE id ='".$_POST['short_code_id']."'",ARRAY_A)[0];
 		if(!empty($edit_short_code)){
 			include PLUGIN_DIR_PATH.'view/edit_short_code.php';
-			// echo "<pre>";
-			// print_r($edit_short_code);
-
+			
 			wp_die();
 
 		}
-		// echo "<pre>";
-		// print_r($edit_short_code);
 		
 	}
 
 	public function update_short_code_details(){
-		print_r($_POST);
+			 global $wpdb;
+		 $shot_code = json_decode(stripslashes($_POST['update_short_code_details']));
+		 $shortcode_name = $shot_code->shortcode_name;
+		 $shortcode_id = $shot_code->short_code_id;
+		 $new_label_data['label_name'] = $shot_code->label_name;
+		 $new_field_data['field_name'] = $shot_code->field_name;
+		 foreach ($new_label_data as $key => $value) {
+		 	foreach ($value as $key => $label_value) {
+		 		$newlabel_value[] = $label_value; 
+		 	}
+		 }
+		  foreach ($new_field_data as $key => $value) {
+		 	foreach ($value as $key => $field_value) {
+		 		$newfield_value[] = $field_value; 
+		 	}
+		 }
+		 
+		 $form_array = serialize(array_combine($newlabel_value,$newfield_value));
+		 $column_values = array('form_id'=>$shortcode_name,'string'=>$form_array);
+		 $where = array('id'=>$shortcode_id);
+		 $table_name = $this->db_prefix().'custome_form';
+		 $update = $wpdb->update($table_name,$column_values,$where);
+		 if($update){
+			echo json_encode(array('status'=>'1'));
+			wp_die();
+		}else{
+			echo json_encode(array('status'=>'0'));
+			wp_die();
+			
+		}
+		
 	}
 
 	public function delete_short_code(){
@@ -81,9 +103,6 @@ class DropboxUpload{
 			wp_die();
 			
 		}
-		// $edit_short_code = $wpdb->get_results("SELECT * FROM $table_name WHERE id ='".$_POST['short_code_id']."'",ARRAY_A)[0];
-		// echo "<pre>";
-		// print_r($edit_short_code);
 		
 	}
 
@@ -95,13 +114,16 @@ class DropboxUpload{
 		}
 		add_filter( 'example_filter', 'example_callback',10,1);
 		$sample = apply_filters( 'example_filter', $_POST);
-		$insert = $wpdb->insert('wp_dropbox_details', $sample);
-		if ($insert) {
-			echo '1';
-		} else {
-			echo '0';
+		$table_name = $this->db_prefix().'dropbox_details';
+		$insert = $wpdb->insert($table_name,$sample);
+		if($insert){
+			echo json_encode(array('status'=>'1'));
+			wp_die();
+		}else{
+			echo json_encode(array('status'=>'0'));
+			wp_die();
 		}
-		die();
+		// die();
 	}
 	public function dropbox_sdk(){
 		$dir  = $this->folder;
@@ -110,8 +132,8 @@ class DropboxUpload{
 	}
 
 	public function add_new_shotcode(){
-		// echo "Hello World";
 		 global $wpdb;
+		 $table_name = $this->db_prefix().'custome_form';
 		 $shot_code = json_decode(stripslashes($_POST['shot_code']));
 		 $shortcode_name = $shot_code->shortcode_name;
 		 $new_label_data['label_name'] = $shot_code->label_name;
@@ -129,13 +151,14 @@ class DropboxUpload{
 		 
 		 $form_array = serialize(array_combine($newlabel_value,$newfield_value));
 		 $column_values = array('form_id'=>$shortcode_name,'string'=>$form_array);
-		 $shotcode = $wpdb->insert('wp_custome_form',$column_values);
+		 $shotcode = $wpdb->insert($table_name,$column_values);
 		 if($shotcode){
-		 	echo "1";
-		 }else{
-		 	echo "0";
-		 }
-
+			echo json_encode(array('status'=>'1'));
+			wp_die();
+		}else{
+			echo json_encode(array('status'=>'0'));
+			wp_die();
+		}
 	}
 
 
@@ -161,7 +184,7 @@ class DropboxUpload{
 		}
 	}
 	public function menu(){
-		add_menu_page('Dropbox Page','Dropbox Upload','manage_options','dropbox_view');
+		add_menu_page('Form Page','Form','manage_options','dropbox_view');
 		add_submenu_page('dropbox_view','File Upload','Dropbox Upload','manage_options','dropbox_view',array($this,'dropbox_view'));
 		add_submenu_page('dropbox_view','Create Form','Add Shot Code','manage_options','create-form',array($this,'custome_form'));
 		add_submenu_page('dropbox_view','List Shot Code','List Shot Code','manage_options','list-shot-code',array($this,'list_shot_code'));
@@ -204,7 +227,7 @@ class DropboxUpload{
 			foreach ($apply_filter as  $shortcode_name => $shortcode_value) {
 				add_shortcode($shortcode_name,function() use ($shortcode_value){
 					foreach($shortcode_value as $key =>$value){
-						echo "$key:<input type='text' value='".$value."'><br>";
+						echo "$key:<input type='".$value."' value=''><br>";
 					}
 				});
 			}
@@ -221,20 +244,33 @@ class DropboxUpload{
 	public function deactivation_hook(){
 		global $wpdb;
 		$table_name  = $this->db_prefix()."dropbox_details";
+		$table_name_short_code = $this->db_prefix()."custome_form";
 		$wpdb->query("TRUNCATE TABLE $table_name ");
-
+		$wpdb->query("TRUNCATE TABLE $table_name_short_code ");
 	}
 
 	public function activation_table(){
 		$table_name  = $this->db_prefix()."dropbox_details";
 		$sql = "CREATE TABLE `$table_name` (
-		`app_key` varchar(15) NOT NULL,
-		`app_secret` varchar(15) NOT NULL,
-		`access_token` varchar(80) NOT NULL
+		`id` int(11) NOT NULL AUTO_INCREMENT,
+		`app_key` varchar(30) NOT NULL,
+		`app_secret` varchar(30) NOT NULL,
+		`access_token` varchar(150) NOT NULL
+		PRIMARY KEY (`id`)
 		) ENGINE=InnoDB DEFAULT CHARSET=latin1;
 		";
+		$table_name_short_code = $this->db_prefix()."custome_form";
+		$sql1 ="CREATE TABLE `$table_name_short_code` (
+		`id` int(11) NOT NULL AUTO_INCREMENT,
+		`form_id` varchar(30) NOT NULL,
+		`string` varchar(500) NOT NULL,
+		PRIMARY KEY (`id`)
+		) ENGINE=InnoDB DEFAULT CHARSET=latin1";
+
+
 		require_once( ABSPATH . 'wp-admin/includes/upgrade.php' );
 		dbDelta( $sql );
+		dbDelta( $sql1 );
 	}
 		// ABSPATH is current project Directory dropbox-wordpress
 }
