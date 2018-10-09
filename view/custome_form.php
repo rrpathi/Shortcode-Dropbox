@@ -1,7 +1,7 @@
 <?php include_once 'header.php'; ?>
 <body>
 <div class="container">
-  <center><h2>Custome Form Creation</h2></center>
+  <center><h2>Create New Short Code</h2></center>
       <div class="form-group col-md-12">
       <label for="text">Shot Code Name</label>
       <input type="text" class="form-control" id="shot_code_name" placeholder="Enter text" name="shot_code_name">

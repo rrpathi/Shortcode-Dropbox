@@ -25,11 +25,11 @@ jQuery(document).ready(function(){
 			},
 			success: function(data) {
 				console.log(data);
-				location. reload(true);
+				// location. reload(true);
 
 			},
 			error: function(errorThrown){
-				location. reload(true);
+				// location. reload(true);
 				
 			} 
 		});

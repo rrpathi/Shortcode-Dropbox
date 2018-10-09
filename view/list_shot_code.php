@@ -7,6 +7,7 @@
     <div class="container show-form-hide">
       <div class="response"></div>
       <h2>Shot Code List</h2>
+        <a href="admin.php?page=create-form" class="btn btn-primary">Add New Shot Code</a>;
       <table class="table">
         <thead>
           <tr>
@@ -27,6 +28,7 @@
       </table>
     </div>
   <?php  } else{
+    echo '<a href="admin.php?page=create-form" class="btn btn-primary">Add New Shot Code</a>';
     echo "<h1>No Shot Code Found</h1>";
   }
 

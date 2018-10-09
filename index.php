@@ -1,6 +1,6 @@
 <?php 
 /*
-Plugin Name:  Dropbox Plugin
+Plugin Name:  WP Form Plugin
 Plugin URI:   https://developer.wordpress.org/plugins/the-basics/
 Description:  Basic WordPress Plugin Header Comment
 Version:      2.0
@@ -50,9 +50,7 @@ class DropboxUpload{
 		$edit_short_code = $wpdb->get_results("SELECT * FROM $table_name WHERE id ='".$_POST['short_code_id']."'",ARRAY_A)[0];
 		if(!empty($edit_short_code)){
 			include PLUGIN_DIR_PATH.'view/edit_short_code.php';
-			
 			wp_die();
-
 		}
 		
 	}
@@ -75,18 +73,22 @@ class DropboxUpload{
 		 	}
 		 }
 		 
-		 $form_array = serialize(array_combine($newlabel_value,$newfield_value));
-		 $column_values = array('form_id'=>$shortcode_name,'string'=>$form_array);
-		 $where = array('id'=>$shortcode_id);
-		 $table_name = $this->db_prefix().'custome_form';
-		 $update = $wpdb->update($table_name,$column_values,$where);
-		 if($update){
-			echo json_encode(array('status'=>'1'));
-			wp_die();
+		$form_array = serialize(array_combine(array_filter($newlabel_value),array_filter($newfield_value)));
+		if(!empty($form_array) && !empty($shortcode_name)){
+			$column_values = array('form_id'=>$shortcode_name,'string'=>$form_array);
+			$where = array('id'=>$shortcode_id);
+			$table_name = $this->db_prefix().'custome_form';
+			$update = $wpdb->update($table_name,$column_values,$where);
+			if($update){
+				echo json_encode(array('status'=>'1'));
+				wp_die();
+			}else{
+				echo json_encode(array('status'=>'0'));
+				wp_die();
+			}
 		}else{
 			echo json_encode(array('status'=>'0'));
-			wp_die();
-			
+				wp_die();
 		}
 		
 	}
@@ -149,16 +151,22 @@ class DropboxUpload{
 		 	}
 		 }
 		 
-		 $form_array = serialize(array_combine($newlabel_value,$newfield_value));
-		 $column_values = array('form_id'=>$shortcode_name,'string'=>$form_array);
-		 $shotcode = $wpdb->insert($table_name,$column_values);
-		 if($shotcode){
-			echo json_encode(array('status'=>'1'));
-			wp_die();
+		$form_array = serialize(array_combine(array_filter($newlabel_value),array_filter($newfield_value)));
+		if(!empty($form_array) && !empty($shortcode_name)){
+			$column_values = array('form_id'=>$shortcode_name,'string'=>$form_array);
+			$shotcode = $wpdb->insert($table_name,$column_values);
+			if($shotcode){
+				echo json_encode(array('status'=>'1'));
+				wp_die();
+			}else{
+				echo json_encode(array('status'=>'0'));
+				wp_die();
+			}
 		}else{
 			echo json_encode(array('status'=>'0'));
 			wp_die();
 		}
+		 
 	}
 
 
@@ -184,10 +192,10 @@ class DropboxUpload{
 		}
 	}
 	public function menu(){
-		add_menu_page('Form Page','Form','manage_options','dropbox_view');
-		add_submenu_page('dropbox_view','File Upload','Dropbox Upload','manage_options','dropbox_view',array($this,'dropbox_view'));
-		add_submenu_page('dropbox_view','Create Form','Add Shot Code','manage_options','create-form',array($this,'custome_form'));
-		add_submenu_page('dropbox_view','List Shot Code','List Shot Code','manage_options','list-shot-code',array($this,'list_shot_code'));
+		add_menu_page('Form Page','Form','manage_options','create-form');
+		add_submenu_page('create-form','Create Form','Add Shot Code','manage_options','create-form',array($this,'custome_form'));
+		add_submenu_page('create-form','List Shot Code','List Shot Code','manage_options','list-shot-code',array($this,'list_shot_code'));
+		add_submenu_page('create-form','File Upload','Dropbox Upload','manage_options','dropbox_view',array($this,'dropbox_view'));
 
 	}
 	public function custome_form(){
@@ -255,7 +263,7 @@ class DropboxUpload{
 		`id` int(11) NOT NULL AUTO_INCREMENT,
 		`app_key` varchar(30) NOT NULL,
 		`app_secret` varchar(30) NOT NULL,
-		`access_token` varchar(150) NOT NULL
+		`access_token` varchar(150) NOT NULL,
 		PRIMARY KEY (`id`)
 		) ENGINE=InnoDB DEFAULT CHARSET=latin1;
 		";
@@ -264,7 +272,8 @@ class DropboxUpload{
 		`id` int(11) NOT NULL AUTO_INCREMENT,
 		`form_id` varchar(30) NOT NULL,
 		`string` varchar(500) NOT NULL,
-		PRIMARY KEY (`id`)
+		PRIMARY KEY (`id`),
+		UNIQUE KEY `form_id` (`form_id`)
 		) ENGINE=InnoDB DEFAULT CHARSET=latin1";
 
 
