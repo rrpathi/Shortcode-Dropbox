@@ -212,7 +212,6 @@ class DropboxUpload{
 		wp_enqueue_script('jquery');
 		wp_enqueue_script('custome.js',PLUGIN_DIR_URL.'js/custome.js');
 		wp_enqueue_script('form-js',PLUGIN_DIR_URL.'js/form.js');
-		wp_enqueue_style( 'font.css','https://maxcdn.bootstrapcdn.com/font-awesome/4.4.0/css/font-awesome.min.css');
 	}
 	public function db_prefix(){
 		global $wpdb;
@@ -284,3 +283,8 @@ class DropboxUpload{
 		// ABSPATH is current project Directory dropbox-wordpress
 }
 $obj = new DropboxUpload();
+
+
+// $data = get_site_transient('update_plugins');
+// print_r($data);
+// exit();
